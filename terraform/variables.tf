@@ -32,3 +32,27 @@ variable "internal_source_range" {
   type        = string
   default     = "10.8.0.0/28"
 }
+
+variable "instance_name" {
+  description = "Name of the Zomboid game server VM"
+  type        = string
+  default     = "zomboid-server"
+}
+
+variable "machine_type" {
+  description = "GCE machine type for the game server"
+  type        = string
+  default     = "e2-medium"
+}
+
+variable "boot_disk_size_gb" {
+  description = "Size of the boot disk in GB"
+  type        = number
+  default     = 10
+}
+
+variable "data_disk_size_gb" {
+  description = "Size of the persistent data disk holding world saves, in GB"
+  type        = number
+  default     = 10
+}
