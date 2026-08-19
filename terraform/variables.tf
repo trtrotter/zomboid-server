@@ -56,3 +56,9 @@ variable "data_disk_size_gb" {
   type        = number
   default     = 10
 }
+
+variable "server_name" {
+  description = "Project Zomboid server name (used in save path and PZ client server list)"
+  type        = string
+  default     = "trottcg-zomboid"
+}

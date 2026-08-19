@@ -13,6 +13,11 @@ resource "google_compute_instance" "zomboid_vm" {
   zone         = var.zone
   tags         = ["zomboid-server"] # matches target_tags in network.tf firewall rules
 
+  metadata = {
+    rcon-port   = var.rcon_port
+    server-name = var.server_name
+  }
+
   boot_disk {
     initialize_params {
       image = "debian-cloud/debian-12"
@@ -48,6 +53,7 @@ resource "google_compute_instance" "zomboid_vm" {
     automatic_restart   = false
   }
 
-  # metadata_startup_script = file("${path.module}/startup.sh")
-  # ^ added for startup.sh
+  metadata_startup_script = file("${path.module}/startup.sh")
+
+  allow_stopping_for_update = true
 }
