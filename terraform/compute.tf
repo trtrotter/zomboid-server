@@ -48,9 +48,9 @@ resource "google_compute_instance" "zomboid_vm" {
   # Spot instance: reclaimable by GCP with 30 seconds' notice. Automatic_restart = false since Terraform/Discord
   # bot controls the lifecycle, not GCP's own restart behavior.
   scheduling {
-    provisioning_model = "SPOT"
-    preemptible         = true
-    automatic_restart   = false
+    provisioning_model = "STANDARD"
+    preemptible         = false
+    automatic_restart   = true
   }
 
   metadata_startup_script = file("${path.module}/startup.sh")

@@ -3,6 +3,13 @@ data "google_compute_network" "default" {
   name = "default"
 }
 
+# Reference the default subnet's actual CIDR range -- Cloud Functions using
+# Direct VPC egress share this same subnet
+data "google_compute_subnetwork" "default" {
+  name   = "default"
+  region = var.region
+}
+
 # Allow inbound Zomboid game traffic (UDP) from anywhere -- this is the actual game connection
 resource "google_compute_firewall" "allow_zomboid" {
   name    = "allow-zomboid-game-port"
@@ -29,10 +36,10 @@ resource "google_compute_firewall" "allow_rcon_internal" {
     ports    = [tostring(var.rcon_port)]
   }
 
-  source_ranges = [var.internal_source_range]
+  source_ranges = [data.google_compute_subnetwork.default.ip_cidr_range]
   target_tags   = ["zomboid-server"]
 
-  description = "Allow RCON only from the internal VPC Connector subnet used by Cloud Functions"
+  description = "Allow RCON only from the default subnet (Cloud Functions use Direct VPC egress into this same subnet)"
 }
 
 # Allow SSH only via Identity-Aware Proxy, not an open port to the internet

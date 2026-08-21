@@ -42,3 +42,15 @@ resource "google_project_iam_member" "function_sa_compute_operator" {
   role    = google_project_iam_custom_role.compute_start_stop.id
   member  = "serviceAccount:${google_service_account.function_sa.email}"
 }
+
+resource "google_project_iam_member" "function_sa_firestore_user" {
+  project = var.project_id
+  role    = "roles/datastore.user"
+  member  = "serviceAccount:${google_service_account.function_sa.email}"
+}
+
+resource "google_secret_manager_secret_iam_member" "function_sa_rcon_accessor" {
+  secret_id = google_secret_manager_secret.rcon_password.id
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:${google_service_account.function_sa.email}"
+}

@@ -27,12 +27,6 @@ variable "rcon_port" {
   default     = 27015
 }
 
-variable "internal_source_range" {
-  description = "CIDR range allowed to reach RCON internally -- matches the Serverless VPC Connector subnet built in Phase 3"
-  type        = string
-  default     = "10.8.0.0/28"
-}
-
 variable "instance_name" {
   description = "Name of the Zomboid game server VM"
   type        = string

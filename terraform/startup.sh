@@ -92,6 +92,18 @@ else
   echo "RCONPort=${RCON_PORT}" >> "${CONFIG_FILE}"
 fi
 
+# --- 10b. Fetch the server (join) password and write it into the config ---
+SERVER_PASSWORD=$(curl -s \
+  -H "Authorization: Bearer ${ACCESS_TOKEN}" \
+  "https://secretmanager.googleapis.com/v1/projects/${PROJECT_ID}/secrets/zomboid-server-password/versions/latest:access" \
+  | python3 -c "import sys, json, base64; print(base64.b64decode(json.load(sys.stdin)['payload']['data']).decode())")
+
+if grep -q "^Password=" "${CONFIG_FILE}"; then
+  sed -i "s/^Password=.*/Password=${SERVER_PASSWORD}/" "${CONFIG_FILE}"
+else
+  echo "Password=${SERVER_PASSWORD}" >> "${CONFIG_FILE}"
+fi
+
 chown -R zomboid:zomboid "${ZOMBOID_HOME}/Zomboid"
 
 # --- 11a. Create a launch wrapper that fetches the admin password at runtime
