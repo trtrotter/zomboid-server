@@ -49,3 +49,17 @@ resource "google_secret_manager_secret_iam_member" "vm_sa_server_password_access
   role      = "roles/secretmanager.secretAccessor"
   member    = "serviceAccount:${google_service_account.vm_sa.email}"
 }
+
+resource "google_secret_manager_secret" "discord_bot_token" {
+  secret_id = "discord-bot-token"
+
+  replication {
+    auto {}
+  }
+}
+
+resource "google_secret_manager_secret_iam_member" "function_sa_discord_token_accessor" {
+  secret_id = google_secret_manager_secret.discord_bot_token.id
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:${google_service_account.function_sa.email}"
+}

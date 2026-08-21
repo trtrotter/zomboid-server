@@ -56,3 +56,13 @@ variable "server_name" {
   type        = string
   default     = "trottcg-zomboid"
 }
+
+variable "discord_public_key" {
+  description = "Discord application's public key, used to verify interaction request signatures"
+  type        = string
+}
+
+variable "discord_application_id" {
+  description = "Discord application ID"
+  type        = string
+}
