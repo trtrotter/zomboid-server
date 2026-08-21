@@ -63,3 +63,13 @@ resource "google_secret_manager_secret_iam_member" "function_sa_discord_token_ac
   role      = "roles/secretmanager.secretAccessor"
   member    = "serviceAccount:${google_service_account.function_sa.email}"
 }
+
+resource "google_secret_manager_secret_iam_member" "vm_sa_cloudflare_accessor" {
+  secret_id = data.google_secret_manager_secret.cloudflare_api_token.id
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:${google_service_account.vm_sa.email}"
+}
+
+data "google_secret_manager_secret" "cloudflare_api_token" {
+  secret_id = "cloudflare-api-token"
+}

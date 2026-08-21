@@ -14,8 +14,9 @@ resource "google_compute_instance" "zomboid_vm" {
   tags         = ["zomboid-server"] # matches target_tags in network.tf firewall rules
 
   metadata = {
-    rcon-port   = var.rcon_port
-    server-name = var.server_name
+    rcon-port    = var.rcon_port
+    server-name  = var.server_name
+    dns-hostname = var.dns_hostname
   }
 
   boot_disk {
@@ -48,9 +49,9 @@ resource "google_compute_instance" "zomboid_vm" {
   # Spot instance: reclaimable by GCP with 30 seconds' notice. Automatic_restart = false since Terraform/Discord
   # bot controls the lifecycle, not GCP's own restart behavior.
   scheduling {
-    provisioning_model = "STANDARD"
-    preemptible         = false
-    automatic_restart   = true
+    provisioning_model  = "SPOT"
+    preemptible         = true
+    automatic_restart   = false
   }
 
   metadata_startup_script = file("${path.module}/startup.sh")

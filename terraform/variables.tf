@@ -66,3 +66,14 @@ variable "discord_application_id" {
   description = "Discord application ID"
   type        = string
 }
+
+variable "cloudflare_zone_id" {
+  description = "Cloudflare Zone ID for trottercg.com"
+  type        = string
+}
+
+variable "dns_hostname" {
+  description = "Full hostname to keep pointed at the VM's current IP"
+  type        = string
+  default     = "zomboid.trottercg.com"
+}

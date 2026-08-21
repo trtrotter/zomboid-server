@@ -159,3 +159,39 @@ systemctl enable zomboid.service
 systemctl restart zomboid.service
 
 echo "Zomboid systemd service configured and (re)started"
+
+# --- 12. Update Cloudflare DNS to point at this VM's current external IP ---
+DNS_HOSTNAME=$(curl -s -H "Metadata-Flavor: Google" "${META_URL}/instance/attributes/dns-hostname")
+EXTERNAL_IP=$(curl -s -H "Metadata-Flavor: Google" "${META_URL}/instance/network-interfaces/0/access-configs/0/external-ip")
+
+CLOUDFLARE_TOKEN=$(curl -s \
+  -H "Authorization: Bearer ${ACCESS_TOKEN}" \
+  "https://secretmanager.googleapis.com/v1/projects/${PROJECT_ID}/secrets/cloudflare-api-token/versions/latest:access" \
+  | python3 -c "import sys, json, base64; print(base64.b64decode(json.load(sys.stdin)['payload']['data']).decode())")
+
+ZONE_ID="6642b444f51bb8e476828f6a903503ab"
+
+EXISTING_RECORD=$(curl -s --http1.1 \
+  -H "Authorization: Bearer ${CLOUDFLARE_TOKEN}" \
+  -H "Content-Type: application/json" \
+  "https://api.cloudflare.com/client/v4/zones/${ZONE_ID}/dns_records?type=A&name=${DNS_HOSTNAME}")
+
+RECORD_ID=$(echo "${EXISTING_RECORD}" | python3 -c "import sys, json; d = json.load(sys.stdin)['result']; print(d[0]['id'] if d else '')")
+
+if [ -n "${RECORD_ID}" ]; then
+  echo "Updating existing DNS record for ${DNS_HOSTNAME} -> ${EXTERNAL_IP}"
+    curl -s --http1.1 -X PATCH \
+    -H "Authorization: Bearer ${CLOUDFLARE_TOKEN}" \
+    -H "Content-Type: application/json" \
+    -d "{\"type\":\"A\",\"name\":\"${DNS_HOSTNAME}\",\"content\":\"${EXTERNAL_IP}\",\"ttl\":60,\"proxied\":false}" \
+    "https://api.cloudflare.com/client/v4/zones/${ZONE_ID}/dns_records/${RECORD_ID}" > /dev/null
+else
+  echo "Creating new DNS record for ${DNS_HOSTNAME} -> ${EXTERNAL_IP}"
+    curl -s --http1.1 -X POST \
+    -H "Authorization: Bearer ${CLOUDFLARE_TOKEN}" \
+    -H "Content-Type: application/json" \
+    -d "{\"type\":\"A\",\"name\":\"${DNS_HOSTNAME}\",\"content\":\"${EXTERNAL_IP}\",\"ttl\":60,\"proxied\":false}" \
+    "https://api.cloudflare.com/client/v4/zones/${ZONE_ID}/dns_records" > /dev/null
+fi
+
+echo "DNS update complete: ${DNS_HOSTNAME} -> ${EXTERNAL_IP}"
